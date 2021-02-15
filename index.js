@@ -7,6 +7,9 @@ const fs = require('fs');
 const shortid = require('shortid');
 const logger = require('loglevel');
 
+const wordpos = new WordPOS();
+logger.setDefaultLevel('info');
+
 const synonymsFilter = arr => arr.map(a => a.toLowerCase() // normalize
   .replace(/[-_]/g, ' ') // swap out hyphens and underscores for spaces
   .replace(/\b.+?[()]{1,}.+?\b/g, ' ') // bin words with one or more weird characters - ie brackets
@@ -21,6 +24,16 @@ const sentencesFilter = (arr, minLength) => R.uniq(
       s => s.split(' ').length >= minLength // don't give me sentences shorter than my example
     )
 );
+
+const writeToFile = (sentences) => {
+  const fileName = `${shortid.generate()}.txt`;
+  const stream = fs.createWriteStream(fileName, { flags: 'a' });
+  sentences.forEach((item) => {
+    stream.write(`${item}\n`);
+  });
+  stream.end();
+  logger.info(`dataset written to ${fileName}`);
+};
 
 // use the function provided to get first definition from wordnet and use its synonyms
 const simpleBuilder = async (fn) => {
@@ -42,8 +55,7 @@ const aggressiveBuilder = async (fn) => {
 };
 
 async function main(sentence, aggressive = false) {
-  const wordpos = new WordPOS();
-  const wordArray = sentence.toLowerCase().split(' ');
+  const wordArray = sentence.toLowerCase().split(' '); // split our sentence into an array of words
   const megaSentenceList = [];
   for (let i = 0; i < wordArray.length; i += 1) {
     const w = wordArray[i];
@@ -68,16 +80,8 @@ async function main(sentence, aggressive = false) {
   const filteredSentences = sentencesFilter(cartesianProduct, wordArray.length);
   logger.debug(filteredSentences);
 
-  const fileName = `${shortid.generate()}.txt`;
-  const stream = fs.createWriteStream(fileName, { flags: 'a' });
-  filteredSentences.forEach((item) => {
-    stream.write(`${item}\n`);
-  });
-  stream.end();
-  logger.info(`dataset written to ${fileName}`);
+  writeToFile(filteredSentences);
 }
 
-
-logger.setDefaultLevel('info');
 const sentence = 'what price is this home';
 main(sentence);
