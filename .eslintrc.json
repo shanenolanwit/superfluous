@@ -1,0 +1,23 @@
+{
+    "extends": "airbnb-base",
+    "rules" : {
+      "import/no-extraneous-dependencies": ["off"],
+      "comma-dangle": ["error", {
+        "arrays": "only-multiline",
+        "objects": "only-multiline",
+        "imports": "only-multiline",
+        "exports": "only-multiline",
+        "functions": "ignore"
+      }],
+      "max-len": ["error", { "code": 140 }]
+    },
+    "parserOptions": {
+      "ecmaVersion": 2018
+    },
+    "plugins": [
+        "mocha"
+    ],
+    "env" : {
+      "mocha" : true
+    }
+  }
